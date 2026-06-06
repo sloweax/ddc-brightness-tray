@@ -6,20 +6,27 @@
 #include <QMenu>
 #include <QSlider>
 #include <QSystemTrayIcon>
+#include <QTimer>
 #include <QWindow>
 
 #include <ddcutil_c_api.h>
 
 class DisplaySlider : public QWidget {
 public:
-    explicit DisplaySlider(DDCA_Display_Info *info, QWidget *parent = nullptr) : QWidget(parent) {
+    explicit DisplaySlider(DDCA_Display_Info *info, int cur, int max, QWidget *parent = nullptr) : QWidget(parent) {
+        timer = new QTimer(this);
         label = new QLabel(this);
         slider = new QSlider(Qt::Horizontal, this);
+        slider->setValue(cur);
+        slider->setMaximum(max);
+        label->setText(info->model_name);
+        timer->setSingleShot(true);
         this->info = info;
         auto *layout = new QHBoxLayout(this);
         layout->addWidget(slider);
         layout->addWidget(label);
-        connect(slider, &QSlider::sliderReleased, this, &DisplaySlider::onSliderReleased);
+        connect(slider, &QSlider::valueChanged, this, &DisplaySlider::onValueChanged);
+        connect(timer, &QTimer::timeout, this, &DisplaySlider::onHeavyTask);
     }
     QSlider *getSlider() {
         return slider;
@@ -28,17 +35,22 @@ public:
         return label;
     }
 private slots:
-    void onSliderReleased() {
+    void onValueChanged(int val) {
+        (void)val;
+        timer->start(100);
+    }
+    void onHeavyTask() {
         DDCA_Display_Handle handle;
         if (ddca_open_display2(info->dref, false, &handle) != 0) return;
-        unsigned int val = slider->value();
-        ddca_set_non_table_vcp_value2(handle, 0x10, (val & 0x00ff) << 8, val & 0xff);
+        unsigned int v = slider->value();
+        ddca_set_non_table_vcp_value2(handle, 0x10, (v & 0x00ff) << 8, v & 0xff);
         ddca_close_display(handle);
     }
 private:
     QSlider *slider;  
     QLabel *label;
     DDCA_Display_Info *info;
+    QTimer *timer;
 };
 
 int main(int argc, char **argv) {
@@ -96,10 +108,7 @@ int main(int argc, char **argv) {
             int max = val.ml | (val.mh >> 8);
             int cur = val.sl | (val.sh >> 8);
 
-            auto *slider = new DisplaySlider(info);
-            slider->getSlider()->setValue(cur);
-            slider->getSlider()->setMaximum(max);
-            slider->getLabel()->setText(info->model_name);
+            auto *slider = new DisplaySlider(info, cur, max);
             widgets.append(slider);
         }
 
