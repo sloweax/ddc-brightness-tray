@@ -31,7 +31,7 @@ private slots:
     void onSliderReleased() {
         DDCA_Display_Handle handle;
         if (ddca_open_display2(info->dref, false, &handle) != 0) return;
-        int val = slider->value();
+        unsigned int val = slider->value();
         ddca_set_non_table_vcp_value2(handle, 0x10, (val & 0x00ff) << 8, val & 0xff);
         ddca_close_display(handle);
     }
