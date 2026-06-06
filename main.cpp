@@ -56,11 +56,11 @@ int main(int argc, char **argv) {
     QSystemTrayIcon tray;
     tray.setIcon(QIcon::fromTheme("display-brightness-symbolic"));
 
-    QMenu *trayMenu = new QMenu();
-    QAction *quitAction = new QAction("Quit", &tray);
-    QObject::connect(quitAction, &QAction::triggered, &QApplication::quit);
-    trayMenu->addAction(quitAction);
-    tray.setContextMenu(trayMenu);
+    QMenu menu = QMenu();
+    QAction quitAction = QAction("Quit");
+    QObject::connect(&quitAction, &QAction::triggered, &QApplication::quit);
+    menu.addAction(&quitAction);
+    tray.setContextMenu(&menu);
 
     tray.show();
 
