@@ -3,6 +3,7 @@ System tray application to manage display brightness using DDC
 
 # Dependencies
 - make
+- pkg-config
 - gcc
 - qt6-base-devel
 - ddcutil-devel
