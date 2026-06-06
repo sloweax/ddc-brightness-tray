@@ -2,6 +2,8 @@
 System tray application to manage display brightness using DDC
 
 # Dependencies
+Make sure your user is added to the i2c group and i2c kernel module is loaded
+
 - make
 - pkg-config
 - gcc
