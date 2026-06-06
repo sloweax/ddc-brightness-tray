@@ -65,6 +65,8 @@ int main(int argc, char **argv) {
     tray.show();
 
     QObject::connect(&tray, &QSystemTrayIcon::activated, [&window, &layout, &widgets, &dlist]{
+        if (window.isVisible()) return;
+
         for (auto &w: widgets) {
             layout.removeWidget(w);
             delete w;
